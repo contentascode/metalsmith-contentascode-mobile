@@ -5,14 +5,23 @@
   "version": "0.0.1",
   "license": "MIT",
   "main": "lib/index.js",
+  "scripts": {
+    "lint": "eslint src/*.js",
+    "build": "./node_modules/.bin/babel -d lib src",
+    "test": "npm -s run lint && npm -s run build &&  mocha --compilers js:babel-register"
+  },
   "devDependencies": {
-    "assert-dir-equal": "0.0.1",
+    "assert-dir-equal": "^1.0.1",
+    "babel-cli": "^6.24.1",
+    "babel-eslint": "^7.2.3",
+    "babel-preset-env": "^1.5.1",
     "eslint": "^3.19.0",
-    "metalsmith": "0.0.0",
-    "mocha": "1.x"
+    "eslint-config-prettier": "^2.1.1",
+    "metalsmith": "^2.3.0",
+    "mocha": "^3.4.2"
   },
   "dependencies": {
-    "async": "^1.5.2",
+    "async": "^2.4.1",
     "debug": "^2.2.0",
     "hercule": "^4.0.1",
     "minimatch": "^3.0.0"

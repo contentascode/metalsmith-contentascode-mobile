@@ -1,0 +1,39 @@
+
+{
+  "root": true,
+  "parser": "babel-eslint",
+  "parserOptions": {
+    "sourceType": "module"
+  },
+  "rules": {
+    "camelcase": 0,
+    "no-lonely-if": 2,
+    "no-else-return": 2,
+    "new-cap": 0,
+    "no-console": "off",
+    "no-empty": 2,
+    "consistent-return": 0,
+    "no-new": 2,
+    "no-var": 2,
+    "object-shorthand": ["error", "always", { "avoidQuotes": true }],
+    "no-throw-literal": 2,
+    "no-self-compare": 2,
+    "no-void": 2,
+    "no-unused-vars": 2,
+    "wrap-iife": 2,
+    "no-eq-null": 2,
+    "strict": [2, "global"],
+    "no-shadow": 0,
+    "no-undef": 2,
+    "valid-jsdoc": 2
+  },
+  "extends": [
+    "eslint:recommended",
+    "prettier"
+  ],
+  "env": {
+    "node": true,
+    "es6": true,
+    "mocha": true
+  }
+}
