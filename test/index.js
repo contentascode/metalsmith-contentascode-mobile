@@ -24,4 +24,12 @@ describe('metalsmith-transclude', function() {
       done();
     });
   });
+
+  it('should build deep trees in order', function(done) {
+    Metalsmith('test/fixtures/deep').use(transclude()).build(function(err) {
+      if (err) return done(err);
+      equal('test/fixtures/deep/expected', 'test/fixtures/deep/build');
+      done();
+    });
+  });
 });

@@ -1,4 +1,4 @@
-const debug = require('debug')('metalsmith-transclude');
+const debug = require('debug')('metalsmith:transclude');
 const hercule = require('hercule');
 const async = require('async');
 const fs = require('fs');
@@ -56,6 +56,23 @@ function plugin(options) {
             });
         }
 
+        function resolveMetalsmith(url) {
+          const isLocalUrl = /^[^ ()"']+/;
+
+          if (!isLocalUrl.test(url)) return null;
+
+          // const relativePath = path.dirname(sourcePath);
+          const targetKey = path.join(path.dirname(key), url);
+          debug('resolved to target key:', targetKey);
+          if (!files[targetKey]) return null;
+          const content = files[targetKey].contents.toString();
+          // console.log('content', content);
+          return {
+            content,
+            url: targetKey
+          };
+        }
+
         function resolveRelativeLocalUrl(url) {
           const isLocalUrl = /^[^ ()"']+/;
 
@@ -65,13 +82,13 @@ function plugin(options) {
           const localUrl = path.join(metalsmith.source(), path.dirname(key), url);
           debug('resolved to localUrl:', localUrl);
           const content = fs.createReadStream(localUrl, { encoding: 'utf8' });
-
+          // console.log('content', content);
           return {
             content,
             url: localUrl
           };
         }
-        const resolvers = [resolveRelativeLocalUrl];
+        const resolvers = [resolveMetalsmith, resolveRelativeLocalUrl];
 
         hercule.transcludeString(contents, { resolvers }, (err, result) => {
           if (err && err.code === 'ENOENT') {
@@ -81,7 +98,8 @@ function plugin(options) {
           if (err) return cb(err);
           // mutate global files array.
           debug('Updated contents of file: ', key);
-          file.contents = result;
+          // console.log('result', result);
+          if (result) files[key].contents = result;
           cb();
         });
       },
