@@ -1,6 +1,6 @@
 # metalsmith-transclude
 
-[![Version](https://img.shields.io/npm/v/metalsmith-transclude.svg)](https://npmjs.com/package/metalsmith-transclude)
+[![Version](https://img.shields.io/npm/v/metalsmith-transclude.svg)](https://npmjs.com/package/metalsmith-transclude) [![Build Status](https://travis-ci.org/contentascode/metalsmith-transclude.svg?branch=master)](https://travis-ci.org/contentascode/metalsmith-transclude)
 
   A metalsmith plugin to transclude documents.
 
