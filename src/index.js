@@ -12,7 +12,7 @@ const minimatch = require('minimatch');
 module.exports = plugin;
 
 /**
- * Metalsmith plugin to manipulate metadata and file metadata.
+ * Metalsmith plugin to transclude content.
  *
  * @return {Function}
  */
@@ -21,6 +21,8 @@ function plugin(options) {
   const { pattern = '**/*.md', permalink = false } = options || {};
 
   return function(files, metalsmith, done) {
+    let transcludedFiles = {};
+
     async.eachOfSeries(
       files,
       (file, key, cb) => {
@@ -56,8 +58,7 @@ function plugin(options) {
             });
         }
 
-        function resolveMetalsmith(url, sourcePath) {
-          console.log('sourcePath', sourcePath);
+        function resolveMetalsmith(url) {
           const isLocalUrl = /^[^ ()"']+/;
           debug('resolveMetalsmith.before isLocal test');
           if (!isLocalUrl.test(url)) return null;
@@ -98,12 +99,16 @@ function plugin(options) {
           if (err) return cb(err);
           // mutate global files array.
           debug('Updated contents of file: ', key);
-          if (result) files[key].contents = result;
+          if (result) transcludedFiles[key] = result;
           cb();
         });
       },
       err => {
         if (err) return done(err);
+        Object.keys(transcludedFiles).forEach(key => {
+          files[key].contents = transcludedFiles[key];
+        });
+
         debug('Transcluded!');
         done();
       }
