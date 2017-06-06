@@ -1,5 +1,7 @@
 # metalsmith-transclude
 
+[![Version](https://img.shields.io/npm/v/metalsmith-transclude.svg)](https://npmjs.com/package/metalsmith-transclude)
+
   A metalsmith plugin to transclude documents.
 
 ## Installation
