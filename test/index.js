@@ -1,5 +1,5 @@
 let rimraf = require('rimraf');
-let assert = require('assert');
+// let assert = require('assert');
 let equal = require('assert-dir-equal');
 let Metalsmith = require('metalsmith');
 let transclude = require('..');

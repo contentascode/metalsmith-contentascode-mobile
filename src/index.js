@@ -21,7 +21,7 @@ function plugin(options) {
   const { pattern = '**/*.md', permalink = false } = options || {};
 
   return function(files, metalsmith, done) {
-    async.eachOf(
+    async.eachOfSeries(
       files,
       (file, key, cb) => {
         let contents = file.contents.toString();
@@ -56,33 +56,33 @@ function plugin(options) {
             });
         }
 
-        function resolveMetalsmith(url) {
+        function resolveMetalsmith(url, sourcePath) {
+          console.log('sourcePath', sourcePath);
           const isLocalUrl = /^[^ ()"']+/;
-
+          debug('resolveMetalsmith.before isLocal test');
           if (!isLocalUrl.test(url)) return null;
 
           // const relativePath = path.dirname(sourcePath);
           const targetKey = path.join(path.dirname(key), url);
-          debug('resolved to target key:', targetKey);
           if (!files[targetKey]) return null;
+          debug('resolved to target key:', targetKey);
           const content = files[targetKey].contents.toString();
-          // console.log('content', content);
+
           return {
             content,
-            url: targetKey
+            url: path.join(metalsmith.source(), targetKey)
           };
         }
 
-        function resolveRelativeLocalUrl(url) {
+        function resolveRelativeLocalUrl(url, sourcePath) {
           const isLocalUrl = /^[^ ()"']+/;
-
+          debug('resolveRelativeLocalUrl.before isLocal test');
           if (!isLocalUrl.test(url)) return null;
 
-          // const relativePath = path.dirname(sourcePath);
-          const localUrl = path.join(metalsmith.source(), path.dirname(key), url);
-          debug('resolved to localUrl:', localUrl);
+          const relativePath = path.dirname(path.join(metalsmith.source(), sourcePath));
+          const localUrl = path.join(relativePath, url);
           const content = fs.createReadStream(localUrl, { encoding: 'utf8' });
-          // console.log('content', content);
+          debug('resolved to localUrl:', localUrl);
           return {
             content,
             url: localUrl
@@ -98,25 +98,23 @@ function plugin(options) {
           if (err) return cb(err);
           // mutate global files array.
           debug('Updated contents of file: ', key);
-          // console.log('result', result);
           if (result) files[key].contents = result;
           cb();
         });
       },
       err => {
-        // console.log('err', err);
         if (err) return done(err);
         debug('Transcluded!');
         done();
       }
     );
   };
-}
 
-function fileExists(filePath) {
-  try {
-    return fs.statSync(filePath).isFile();
-  } catch (err) {
-    return false;
+  function fileExists(filePath) {
+    try {
+      return fs.statSync(filePath).isFile();
+    } catch (err) {
+      return false;
+    }
   }
 }
