@@ -1,8 +1,8 @@
-var rimraf = require('rimraf');
-var assert = require('assert');
-var equal = require('assert-dir-equal');
-var Metalsmith = require('metalsmith');
-var transclude = require('..');
+let rimraf = require('rimraf');
+let assert = require('assert');
+let equal = require('assert-dir-equal');
+let Metalsmith = require('metalsmith');
+let transclude = require('..');
 
 describe('metalsmith-transclude', function() {
   before(function(done) {
@@ -13,6 +13,14 @@ describe('metalsmith-transclude', function() {
     Metalsmith('test/fixtures/simple').use(transclude()).build(function(err) {
       if (err) return done(err);
       equal('test/fixtures/simple/expected', 'test/fixtures/simple/build');
+      done();
+    });
+  });
+
+  it('should skip missing missing files', function(done) {
+    Metalsmith('test/fixtures/missing').use(transclude()).build(function(err) {
+      if (err) return done(err);
+      equal('test/fixtures/missing/expected', 'test/fixtures/missing/build');
       done();
     });
   });

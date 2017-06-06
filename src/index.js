@@ -61,35 +61,32 @@ function plugin(options) {
 
           if (!isLocalUrl.test(url)) return null;
 
-          try {
-            // const relativePath = path.dirname(sourcePath);
-            const localUrl = path.join(metalsmith.source(), path.dirname(key), url);
-            const content = fs.createReadStream(localUrl, { encoding: 'utf8' });
+          // const relativePath = path.dirname(sourcePath);
+          const localUrl = path.join(metalsmith.source(), path.dirname(key), url);
+          debug('resolved to localUrl:', localUrl);
+          const content = fs.createReadStream(localUrl, { encoding: 'utf8' });
 
-            return {
-              content,
-              url: localUrl
-            };
-          } catch (e) {
-            if (e.code === 'ENOENT') {
-              debug("Couldn't find the following file and skipped it. " + e.path);
-
-              return cb();
-            }
-            throw e;
-          }
+          return {
+            content,
+            url: localUrl
+          };
         }
-
         const resolvers = [resolveRelativeLocalUrl];
 
         hercule.transcludeString(contents, { resolvers }, (err, result) => {
+          if (err && err.code === 'ENOENT') {
+            debug("Couldn't find the following file and skipped it. " + err.path);
+            return cb();
+          }
           if (err) return cb(err);
           // mutate global files array.
+          debug('Updated contents of file: ', key);
           file.contents = result;
           cb();
         });
       },
       err => {
+        // console.log('err', err);
         if (err) return done(err);
         debug('Transcluded!');
         done();
