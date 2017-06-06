@@ -8,7 +8,6 @@
   "scripts": {
     "lint": "eslint src/*.js",
     "build": "./node_modules/.bin/babel -d lib src",
-    "build:grammar": "mkdir -p ./lib/grammar && pegjs -o lib/grammar/link.js src/grammar/link.pegjs",
     "test": "npm -s run lint && npm -s run build &&  mocha --compilers js:babel-register"
   },
   "devDependencies": {
