@@ -15,7 +15,9 @@
 ```json
 {
   "plugins": {
-    "metalsmith-transclude": true
+    "metalsmith-transclude": {
+      "comments": false
+    }
   }
 }
 ```
@@ -40,7 +42,6 @@ Hi!
 
 ## TODO:
 
- - [X] Add tests
  - [ ] Allow transclusion of remote content (this might already work)
  - [ ] Add options to parameterise transclusions.
 

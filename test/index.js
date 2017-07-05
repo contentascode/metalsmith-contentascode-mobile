@@ -1,8 +1,8 @@
-let rimraf = require('rimraf');
+const rimraf = require('rimraf');
 // let assert = require('assert');
-let equal = require('assert-dir-equal');
-let Metalsmith = require('metalsmith');
-let transclude = require('..');
+const equal = require('assert-dir-equal');
+const Metalsmith = require('metalsmith');
+const transclude = require('..');
 
 describe('metalsmith-transclude', function() {
   before(function(done) {
