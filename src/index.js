@@ -141,7 +141,7 @@ function plugin(options) {
           hercule.resolveLocalUrl /*, resolveRelativeLocalUrl */
         ];
 
-        hercule.transcludeFile(path.join(metalsmith.source(), key), { resolvers }, (err, result) => {
+        hercule.transcludeString(file.contents, { resolvers }, (err, result) => {
           if (err && err.code === 'ENOENT') {
             debug("Couldn't find the following file and skipped it. " + err.path);
             return cb();
