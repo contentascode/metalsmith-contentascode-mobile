@@ -1,8 +1,8 @@
 {
-  "name": "metalsmith-transclude",
-  "description": "A metalsmith plugin to transclude content",
+  "name": "metalsmith-transclude-transform",
+  "description": "A metalsmith plugin to transform content before transclusion with metalsmith-transclude",
   "repository": "git://github.com/iilab/metalsmith-transclude.git",
-  "version": "0.2.2",
+  "version": "0.0.1",
   "license": "MIT",
   "main": "lib/index.js",
   "scripts": {
@@ -28,7 +28,7 @@
     "babel-plugin-transform-object-rest-spread": "^6.23.0",
     "debug": "^2.2.0",
     "gray-matter": "^3.0.2",
-    "hercule": "^4.0.1",
+    "hercule": "github:contentascode/hercule#resolver-placeholder",
     "json-pointer": "^0.6.0",
     "minimatch": "^3.0.0",
     "pegjs": "^0.10.0"

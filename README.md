@@ -1,8 +1,8 @@
-# metalsmith-transclude
+# metalsmith-transclude-transform
 
-[![Version](https://img.shields.io/npm/v/metalsmith-transclude.svg)](https://npmjs.com/package/metalsmith-transclude) [![Build Status](https://travis-ci.org/contentascode/metalsmith-transclude.svg?branch=master)](https://travis-ci.org/contentascode/metalsmith-transclude)
+[![Version](https://img.shields.io/npm/v/metalsmith-transclude-transform.svg)](https://npmjs.com/package/metalsmith-transclude-transform) [![Build Status](https://travis-ci.org/contentascode/metalsmith-transclude-transform.svg?branch=master)](https://travis-ci.org/contentascode/metalsmith-transclude-transform)
 
-  A metalsmith plugin to transclude documents.
+  A metalsmith plugin to transform content before transclusion with metalsmith-transclude.
 
 ## Installation
 
@@ -15,35 +15,34 @@
 ```json
 {
   "plugins": {
-    "metalsmith-transclude": {
-      "comments": false
+    "metalsmith-transclude-transform": {
+      "permalinks": true,
+      "folders": true
     }
   }
 }
 ```
 
-This will follow expressions of this form:
+The `permalinks` option will transform transclusion links of the form:
+```
+:[](include/file)
+```
 
-index.md:
+if the destination file exists into:
 ```
 :[](include/file.md)
 ```
 
-include/file.md:
+The `folders` option will transform transclusion links of the form:
 ```
-Hi!
-```
-
-and include them inside the build:
-build/index.md:
-```
-Hi!
+:[](include)
 ```
 
-## TODO:
-
- - [ ] Allow transclusion of remote content (this might already work)
- - [ ] Add options to parameterise transclusions.
+if the destination folder exists and is non empty (in this example the `include` folder contains files `file1.md` and `file2.md` to:
+```
+:[](include/file1.md)
+:[](include/file2.md)
+```
 
 ## License
 
