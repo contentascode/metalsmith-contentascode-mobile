@@ -42,6 +42,20 @@ function plugin(options) {
         // const matches = Object.keys(files).filter(key => key.startsWith(targetKey));
         return { content: placeholder };
       };
+
+      // # Invariants:
+      //
+      // ## patterns commute with juxtaposition
+      //
+      // :[](browse/activity)
+      // :[](browse/context)
+      // :[](browse/framework)
+      //
+      // process to the same as
+      // :[](browse)
+      //
+      // where browse is a folder containing activity.md / context.md / framework.md
+
       const resolveFolders = (url, source, placeholder) => {
         debug('>>> resolveFolders        :', url);
         const targetKey = path.join(path.dirname(key), url);
@@ -52,7 +66,13 @@ function plugin(options) {
           return null;
         }
         debug('>>> Found target files            :', matches.join(' '));
-        return { content: matches.map(value => placeholder.replace(url, value)).join('\n') };
+
+        return {
+          content: matches
+            .map(value => value.replace(targetKey.split('/').slice(0, -1).join('/') + '/', ''))
+            .map(value => placeholder.replace(url, value))
+            .join('\n')
+        };
       };
 
       // Return link if the target cannot be resolved.
