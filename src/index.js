@@ -44,7 +44,7 @@ function plugin(options) {
         return content;
       };
 
-      const transclusion = /:\[.*\]\((\S*)\s?(\S*)\)/g;
+      const transclusion = /\s:\[.*\]\((\S*)\s?(\S*)\)/g;
 
       const contents = new Buffer(
         file.contents.toString().replace(transclusion, (placeholder, url) =>
