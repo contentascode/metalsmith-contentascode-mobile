@@ -10,7 +10,8 @@
     "build": "babel -d lib src",
     "build:watch": "nodemon --watch src --exec npm run build",
     "test": "npm -s run lint && npm -s run build &&  mocha --compilers js:babel-register",
-    "postversion": "git push --follow-tags"
+    "postversion": "git push --follow-tags",
+    "prepublish": "npm run build"
   },
   "devDependencies": {
     "assert-dir-equal": "^1.0.1",
