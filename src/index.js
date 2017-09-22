@@ -47,12 +47,11 @@ function plugin(options) {
       const transclusion = /:\[.*\]\((\S*)\s?(\S*)\)/g;
 
       const contents = new Buffer(
-        file.contents
-          .toString()
-          .replace(
-            transclusion,
-            (placeholder, url) => setTimeout(resolveFolders(url, key, placeholder), 0) || placeholder
-          )
+        file.contents.toString().replace(transclusion, (placeholder, url) =>
+          setTimeout(function() {
+            return resolveFolders(url, key, placeholder) || placeholder;
+          }, 0)
+        )
       );
 
       return cb(null, { ...file, contents });
