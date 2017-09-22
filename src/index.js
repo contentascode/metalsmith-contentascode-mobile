@@ -22,40 +22,36 @@ function plugin(options) {
   const { permalinks = false, folders = false } = options || {};
 
   return function transclude_transform(files, metalsmith, done) {
-    const process = setTimeout(function() {
-      return (file, key, cb) => {
-        const resolveFolders = (url, source, placeholder) => {
-          debug('>>> resolveFolders        :', url);
-          const targetKey = path.join(path.dirname(key), url);
-          const matches = Object.keys(files).filter(key => key.startsWith(targetKey));
-          debug('>>> Using targetKey       :', targetKey);
-          if (matches.length == 0) {
-            debug('>>> No target files found');
-            return null;
-          }
-          debug('>>> Found target files    :', matches.join(' '));
+    const process = (file, key, cb) => {
+      const resolveFolders = (url, source, placeholder) => {
+        debug('>>> resolveFolders        :', url);
+        const targetKey = path.join(path.dirname(key), url);
+        const matches = Object.keys(files).filter(key => key.startsWith(targetKey));
+        debug('>>> Using targetKey       :', targetKey);
+        if (matches.length == 0) {
+          debug('>>> No target files found');
+          return null;
+        }
+        debug('>>> Found target files    :', matches.join(' '));
 
-          const content = matches
-            .map(value => path.join(url, value.replace(targetKey.split(url + '/').slice(-1).join('/'), '')))
-            .map(value => placeholder.replace(url, value))
-            .join('\n');
+        const content = matches
+          .map(value => path.join(url, value.replace(targetKey.split(url + '/').slice(-1).join('/'), '')))
+          .map(value => placeholder.replace(url, value))
+          .join('\n');
 
-          debug('>>> Content               :', content);
+        debug('>>> Content               :', content);
 
-          return content;
-        };
-
-        const transclusion = /\s:\[.*\]\((\S*)\s?(\S*)\)/g;
-
-        const contents = new Buffer(
-          file.contents
-            .toString()
-            .replace(transclusion, (placeholder, url) => resolveFolders(url, key, placeholder) || placeholder)
-        );
-
-        return cb(null, { ...file, contents });
+        return content;
       };
-    }, 0);
+
+      const transclusion = /\s:\[.*\]\((\S*)\s?(\S*)\)/g;
+
+      const contents = file.contents
+        .toString()
+        .replace(transclusion, (placeholder, url) => resolveFolders(url, key, placeholder) || placeholder);
+
+      return cb(null, { ...file, contents: new Buffer(contents) });
+    };
 
     // const process_old = (file, key, cb) => {
     //
