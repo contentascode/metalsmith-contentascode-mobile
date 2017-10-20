@@ -1,6 +1,7 @@
 const debug = require('debug')('metalsmith:transclude-transform');
 const async = require('async');
 const path = require('path');
+const match = require('multimatch');
 
 /**
  * Expose `plugin`.
@@ -19,10 +20,15 @@ module.exports = plugin;
  */
 
 function plugin(options) {
-  const { permalinks = false, folders = false } = options || {};
+  const { patterns = ['**/*.md'], permalinks = false, folders = false } = options || {};
 
   return function transclude_transform(files, metalsmith, done) {
     const process = (file, key, cb) => {
+      if (match(key, patterns).length === 0) {
+        debug('skip', key);
+        return cb(); // do nothing
+      }
+
       const resolveFolders = (url, source, placeholder) => {
         debug('>>> resolveFolders        :', url);
         const targetKey = path.join(path.dirname(key), url);
@@ -35,7 +41,18 @@ function plugin(options) {
         debug('>>> Found target files    :', matches.join(' '));
 
         const content = matches
-          .map(value => path.join(url, value.replace(targetKey.split(url + '/').slice(-1).join('/'), '')))
+          .map(value =>
+            path.join(
+              url,
+              value.replace(
+                targetKey
+                  .split(url + '/')
+                  .slice(-1)
+                  .join('/'),
+                ''
+              )
+            )
+          )
           .map(value => placeholder.replace(url, value))
           .join('\n');
 
@@ -46,9 +63,9 @@ function plugin(options) {
 
       const transclusion = /\s:\[.*\]\((\S*)\s?(\S*)\)/g;
 
-      const contents = file.contents
-        .toString()
-        .replace(transclusion, (placeholder, url) => resolveFolders(url, key, placeholder) || placeholder);
+      const replacer = (placeholder, url) => resolveFolders(url, key, placeholder) || placeholder;
+
+      const contents = file.contents.toString().replace(transclusion, replacer);
 
       return cb(null, { ...file, contents: new Buffer(contents) });
     };
@@ -122,7 +139,7 @@ function plugin(options) {
     //   });
     // };
 
-    async.mapValues(files, process, (err, res) => {
+    async.mapValuesSeries(files, process, (err, res) => {
       if (err) throw err;
       Object.keys(files).forEach(key => {
         // debug('<< File keys: ', Object.keys(files[key]));
