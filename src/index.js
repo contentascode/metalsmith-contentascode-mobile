@@ -19,7 +19,8 @@ module.exports = plugin;
  */
 
 function plugin(options) {
-  const { destination, patterns = ['**/*.md'], install = true, expo: { name, slug, privacy } } = options || {};
+  const { destination, patterns = ['**/*.md'], install = true, expo: { name, slug, privacy = 'private' } = {} } =
+    options || {};
 
   return function contentascode_mobile(files, metalsmith, done) {
     const process = (file, key, cb) => {
@@ -63,7 +64,9 @@ function plugin(options) {
 
     // Add info for publishing on expo.io
 
-    const expo = { name: name || metalsmith.pkg.description, slug: slug || metalsmith.pkg.name, privacy };
+    const pkg = require(path.join(metalsmith._destination, '..', 'package.json'));
+
+    const expo = { name: name || pkg.description, slug: slug || pkg.name, privacy };
 
     debug('metalsmith', metalsmith);
 
