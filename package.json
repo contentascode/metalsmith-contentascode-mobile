@@ -2,7 +2,7 @@
   "name": "metalsmith-contentascode-mobile",
   "description": "A metalsmith plugin to transform content before build with contentascode mobile pipeline",
   "repository": "git://github.com/iilab/metalsmith-contentascode-mobile.git",
-  "version": "0.0.2",
+  "version": "0.0.3",
   "license": "MIT",
   "main": "lib/index.js",
   "scripts": {
