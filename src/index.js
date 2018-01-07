@@ -83,7 +83,9 @@ function plugin(options) {
         // debug('<< File keys: ', Object.keys(files[key]));
         // debug('<< Res keys: ', Object.keys(res[key]));
         if (match(key, patterns).length === 0) {
-          debug('skip', key);
+          debug('move', key);
+          files[path.join(destination, key)] = files[key];
+          delete files[key];
         } else if (res[key]) {
           delete files[key];
           files[path.join(destination, key + '.js')] = res[key];
@@ -96,7 +98,7 @@ function plugin(options) {
         `const index = {` +
         Object.keys(files)
           .filter(k => k.endsWith('.md.js'))
-          .map(k => `[\`${path.join('.', k)}\`]: require("./${path.join('.', k)}")`)
+          .map(k => `[\`${path.relative('content', k)}\`]: require("./${path.relative('content', k)}")`)
           .join(',\n') +
         `}; \n export default index;`;
 
