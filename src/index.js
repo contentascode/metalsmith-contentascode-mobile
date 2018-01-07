@@ -1,4 +1,4 @@
-const debug = require('debug')('metalsmith:transclude-transform');
+const debug = require('debug')('metalsmith:contentascode_mobile');
 const async = require('async');
 const path = require('path');
 const match = require('multimatch');
@@ -10,146 +10,97 @@ const match = require('multimatch');
 module.exports = plugin;
 
 /**
- * Metalsmith plugin to transform content before transclusion.
+ * Metalsmith plugin to transform content for a contentascode mobile pipeline.
  *
  *
  * @param {Object} options
- * @param {string} options.frontmatter Include frontmatter in parent file.
  *
  * @return {Function}
  */
 
 function plugin(options) {
-  const { patterns = ['**/*.md'], permalinks = false, folders = false } = options || {};
+  const { destination, patterns = ['**/*.md'], install = true, expo: { name, slug, privacy } } = options || {};
 
-  return function transclude_transform(files, metalsmith, done) {
+  return function contentascode_mobile(files, metalsmith, done) {
     const process = (file, key, cb) => {
       if (match(key, patterns).length === 0) {
         debug('skip', key);
         return cb(); // do nothing
       }
 
-      const resolveFolders = (url, source, placeholder) => {
-        debug('>>> resolveFolders        :', url);
-        const targetKey = path.join(path.dirname(key), url);
-        const matches = Object.keys(files).filter(key => key.startsWith(targetKey));
-        debug('>>> Using targetKey       :', targetKey);
-        if (matches.length == 0) {
-          debug('>>> No target files found');
-          return null;
-        }
-        debug('>>> Found target files    :', matches.join(' '));
+      const { contents, raw, mode, paths, stats, ...metadata } = files[key];
 
-        const content = matches
-          .map(value =>
-            path.join(
-              url,
-              value.replace(
-                targetKey
-                  .split(url + '/')
-                  .slice(-1)
-                  .join('/'),
-                ''
-              )
-            )
-          )
-          .map(value => placeholder.replace(url, value))
-          .join('\n');
+      // Include markdown and metadata as symbols.
+      const md = `const md = \`${contents.toString().replace(/`/g, '\\`')}\``;
+      const meta = `const meta = { ${Object.keys(metadata)
+        .map(k => `[\`${k}\`]: ${JSON.stringify(metadata[k])}`)
+        .join(',')} }`;
 
-        debug('>>> Content               :', content);
+      // Include images as a dictionary of requires
+      const prefix = key
+        .split('/')
+        .slice(0, -1)
+        .join('/');
+      debug('prefix', prefix);
 
-        return content;
-      };
+      const images =
+        `const images = {` +
+        Object.keys(files)
+          .filter(k => k.startsWith(prefix) && (k.endsWith('.png') || k.endsWith('.jpg') || k.endsWith('.jpeg')))
+          .map(k => k.replace(prefix, ''))
+          .map(k => `[\`${path.join('.', k)}\`]: require("./${path.join('.', k)}")`)
+          .join(',') +
+        `}`;
 
-      const transclusion = /\s:\[.*\]\((\S*)\s?(\S*)\)/g;
+      debug('images', images);
+      // const images = { [`1_introduction.png`]: require('./1_introduction.png') };
 
-      const replacer = (placeholder, url) => resolveFolders(url, key, placeholder) || placeholder;
+      const js = md + '\n' + meta + '\n' + images + '\nexport { md, meta, images};';
+      // Rename .md as .md.js
 
-      const contents = file.contents.toString().replace(transclusion, replacer);
-
-      return cb(null, { ...file, contents: new Buffer(contents) });
+      return cb(null, { ...file, contents: new Buffer(js) });
     };
 
-    // const process_old = (file, key, cb) => {
-    //
-    //   const resolvePermalinks = (url, source, placeholder) => {
-    //     debug('>>> resolvePermalinks      :', url);
-    //     // const targetKey = path.join(path.dirname(key), url);
-    //     // const matches = Object.keys(files).filter(key => key.startsWith(targetKey));
-    //     return { content: placeholder };
-    //   };
-    //
-    //   // # Invariants:
-    //   //
-    //   // ## patterns commute with juxtaposition
-    //   //
-    //   // :[](browse/activity)
-    //   // :[](browse/context)
-    //   // :[](browse/framework)
-    //   //
-    //   // process to the same as
-    //   // :[](browse)
-    //   //
-    //   // where browse is a folder containing activity.md / context.md / framework.md
-    //
-    //
-    //   const resolveFolders = (url, source, placeholder) => {
-    //     debug('>>> resolveFolders        :', url);
-    //     const targetKey = path.join(path.dirname(key), url);
-    //     const matches = Object.keys(files).filter(key => key.startsWith(targetKey));
-    //     debug('>>> Using targetKey       :', targetKey);
-    //     if (matches.length == 0) {
-    //       debug('>>> No target files found');
-    //       return null;
-    //     }
-    //     debug('>>> Found target files    :', matches.join(' '));
-    //
-    //     const content = matches
-    //       .map(value => path.join(url, value.replace(targetKey.split(url + '/').slice(-1).join('/'), '')))
-    //       .map(value => placeholder.replace(url, value))
-    //       .join('\n');
-    //
-    //     debug('>>> Content               :', content);
-    //
-    //     return {
-    //       content
-    //     };
-    //   };
-    //
-    //   // Return link if the target cannot be resolved.
-    //   const resolvers = [
-    //     /*resolvePermalinks, */ resolveFolders,
-    //     (url, source, placeholder) => ({ content: placeholder })
-    //   ];
-    //
-    //
-    //
-    //   hercule.transcludeString(file.contents, { resolvers }, (err, result) => {
-    //     // if (err && err.code === 'ENOENT') {
-    //     //   debug("Couldn't find the following file and skipped it. " + err.path);
-    //     //   return cb();
-    //     // }
-    //     if (err) {
-    //       console.error(err);
-    //       return cb(err);
-    //     }
-    //     // debug('<< Result: ', result);
-    //     debug('<< Finished processing file: ', key);
-    //     return cb(null, { ...file, contents: new Buffer(result) });
-    //   });
-    // };
+    // Add info for publishing on expo.io
+
+    const expo = { name: name || metalsmith.pkg.description, slug: slug || metalsmith.pkg.name, privacy };
+
+    debug('metalsmith', metalsmith);
+
+    const json = require(path.join(metalsmith._destination, 'app.json'));
+
+    const app = { ...json, expo: { ...json.expo, ...expo } };
+
+    debug('app.json', JSON.stringify(app, true, 2));
+    files['app.json'] = { contents: new Buffer(JSON.stringify(app, true, 2)) };
 
     async.mapValuesSeries(files, process, (err, res) => {
       if (err) throw err;
       Object.keys(files).forEach(key => {
         // debug('<< File keys: ', Object.keys(files[key]));
         // debug('<< Res keys: ', Object.keys(res[key]));
-        if (res[key]) {
-          files[key] = res[key];
-        } else {
+        if (match(key, patterns).length === 0) {
+          debug('skip', key);
+        } else if (res[key]) {
           delete files[key];
+          files[path.join(destination, key + '.js')] = res[key];
         }
       });
+
+      // Create overall index.js file with require dictionary.
+
+      const index =
+        `const index = {` +
+        Object.keys(files)
+          .filter(k => k.endsWith('.md.js'))
+          .map(k => `[\`${path.join('.', k)}\`]: require("./${path.join('.', k)}")`)
+          .join(',\n') +
+        `}; \n export default index;`;
+
+      files[path.join(destination, 'index.js')] = {
+        contents: new Buffer(index)
+      };
+
       done();
     });
   };
