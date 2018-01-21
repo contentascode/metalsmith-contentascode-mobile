@@ -4,7 +4,7 @@ const path = require('path');
 const match = require('multimatch');
 const spawnSync = require('child_process').spawnSync;
 const spawn = require('child_process').spawn;
-
+const fs = require('fs-extra');
 /**
  * Expose `plugin`.
  */
@@ -71,7 +71,6 @@ function plugin(options) {
     };
 
     // Add info for publishing on expo.io
-
     const pkg = require(path.join(metalsmith._destination, '..', 'package.json'));
 
     const expo = { name: name || pkg.description, slug: slug || pkg.name, privacy };
@@ -83,7 +82,7 @@ function plugin(options) {
     const app = { ...json, expo: { ...json.expo, ...expo } };
 
     debug('app.json', JSON.stringify(app, true, 2));
-    files['app.json'] = { contents: new Buffer(JSON.stringify(app, true, 2)) };
+    fs.writeFileSync(path.join(metalsmith._destination, 'app.json'), JSON.stringify(app, true, 2), 'utf-8');
 
     async.mapValuesSeries(files, transform, (err, res) => {
       if (err) throw err;
