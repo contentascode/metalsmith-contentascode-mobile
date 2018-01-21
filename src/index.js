@@ -114,20 +114,34 @@ function plugin(options) {
         contents: new Buffer(index)
       };
 
-      const { watchRun } = metalsmith.metadata();
+      const { watch, watchRun } = metalsmith.metadata();
       debug('watchRun', watchRun);
       if (watchRun !== true) {
-        spawnSync('npm', ['install', '--silent'], {
-          cwd: path.join(metalsmith._destination),
-          stdio: 'inherit'
-        });
+        const npmInstall =
+          install &&
+          spawnSync('npm', ['install', '--silent'], {
+            cwd: path.join(metalsmith._destination),
+            stdio: 'inherit'
+          });
 
-        spawn('npm', ['start'], {
-          cwd: path.join(metalsmith._destination),
-          stdio: 'inherit'
-        });
+        if (npmInstall.signal === 'SIGINT') {
+          process.kill(process.pid, 'SIGINT');
+        } else {
+          const npmStart =
+            start &&
+            watch &&
+            spawn('npm', ['start'], {
+              cwd: path.join(metalsmith._destination),
+              detached: true,
+              stdio: 'inherit'
+            });
+
+          npmStart &&
+            npmStart.on('exit', () => {
+              process.kill(process.pid, 'SIGINT');
+            });
+        }
       }
-
       done();
     });
   };
