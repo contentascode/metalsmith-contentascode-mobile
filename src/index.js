@@ -2,6 +2,8 @@ const debug = require('debug')('metalsmith:contentascode_mobile');
 const async = require('async');
 const path = require('path');
 const match = require('multimatch');
+const spawnSync = require('child_process').spawnSync;
+const spawn = require('child_process').spawn;
 
 /**
  * Expose `plugin`.
@@ -19,11 +21,17 @@ module.exports = plugin;
  */
 
 function plugin(options) {
-  const { destination, patterns = ['**/*.md'], install = true, expo: { name, slug, privacy = 'private' } = {} } =
+  const {
+    destination,
+    patterns = ['**/*.md'],
+    install = true,
+    start = true,
+    expo: { name, slug, privacy = 'private' } = {}
+  } =
     options || {};
 
   return function contentascode_mobile(files, metalsmith, done) {
-    const process = (file, key, cb) => {
+    const transform = (file, key, cb) => {
       if (match(key, patterns).length === 0) {
         debug('skip', key);
         return cb(); // do nothing
@@ -77,7 +85,7 @@ function plugin(options) {
     debug('app.json', JSON.stringify(app, true, 2));
     files['app.json'] = { contents: new Buffer(JSON.stringify(app, true, 2)) };
 
-    async.mapValuesSeries(files, process, (err, res) => {
+    async.mapValuesSeries(files, transform, (err, res) => {
       if (err) throw err;
       Object.keys(files).forEach(key => {
         // debug('<< File keys: ', Object.keys(files[key]));
@@ -105,6 +113,20 @@ function plugin(options) {
       files[path.join(destination, 'index.js')] = {
         contents: new Buffer(index)
       };
+
+      const { watchRun } = metalsmith.metadata();
+      debug('watchRun', watchRun);
+      if (watchRun !== true) {
+        spawnSync('npm', ['install', '--silent'], {
+          cwd: path.join(metalsmith._destination),
+          stdio: 'inherit'
+        });
+
+        spawn('npm', ['start'], {
+          cwd: path.join(metalsmith._destination),
+          stdio: 'inherit'
+        });
+      }
 
       done();
     });
