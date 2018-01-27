@@ -55,7 +55,11 @@ function plugin(options) {
       const images =
         `const images = {` +
         Object.keys(files)
-          .filter(k => k.startsWith(prefix) && (k.endsWith('.png') || k.endsWith('.jpg') || k.endsWith('.jpeg')))
+          .filter(
+            k =>
+              k.startsWith(prefix) &&
+              (k.endsWith('.png') || k.endsWith('.jpg') || k.endsWith('.jpeg') || k.endsWith('.gif'))
+          )
           .map(k => k.replace(prefix, ''))
           .map(k => `[\`${path.join('.', k)}\`]: require("./${path.join('.', k)}")`)
           .join(',') +
