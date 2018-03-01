@@ -77,7 +77,16 @@ function plugin(options) {
     // Add info for publishing on expo.io
     const pkg = require(path.join(metalsmith._destination, '..', 'package.json'));
 
-    const expo = { name: name || pkg.description, slug: slug || pkg.name, privacy };
+    const expo = {
+      name: name || pkg.description,
+      slug: slug || pkg.name,
+      privacy,
+      android: {
+        package: `com.apprentice.${slug.replace('-', '_')}`,
+        versionCode: pkg.version,
+        permissions: ['com.android.launcher.permission.INSTALL_SHORTCUT']
+      }
+    };
 
     debug('metalsmith', metalsmith);
 
