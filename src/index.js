@@ -82,7 +82,7 @@ function plugin(options) {
       slug: slug || pkg.name,
       privacy,
       android: {
-        package: `com.apprentice.${slug.replace('-', '_')}`,
+        package: `com.apprentice.${(slug || pkg.name).replace('-', '_')}`,
         versionCode: pkg.version,
         permissions: ['com.android.launcher.permission.INSTALL_SHORTCUT']
       }
