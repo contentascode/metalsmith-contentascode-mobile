@@ -11,7 +11,9 @@
     "build:watch": "nodemon --watch src --exec npm run build",
     "test": "npm -s run lint && npm -s run build &&  mocha --compilers js:babel-register",
     "postversion": "git push --follow-tags",
-    "prepublishOnly": "npm run build"
+    "prepublishOnly": "npm run build",
+    "snyk-protect": "snyk protect",
+    "prepare": "npm run snyk-protect"
   },
   "devDependencies": {
     "assert-dir-equal": "^1.0.1",
@@ -28,6 +30,8 @@
   "dependencies": {
     "async": "^2.4.1",
     "debug": "^2.2.0",
-    "multimatch": "^2.1.0"
-  }
+    "multimatch": "^2.1.0",
+    "snyk": "^1.316.1"
+  },
+  "snyk": true
 }
